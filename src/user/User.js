@@ -55,6 +55,8 @@ const User = {
           return reject(error);
         }
 
+        Data.notify('onLogout');
+
         resolve();
       });
     });

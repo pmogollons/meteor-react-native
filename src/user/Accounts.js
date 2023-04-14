@@ -127,6 +127,10 @@ class AccountsPassword {
     Data.on('onLoginFailure', cb);
   };
 
+  onLogout = (cb) => {
+    Data.on('onLogout', cb);
+  };
+
   /**
    * Verify if the logged user has 2FA enabled
    * @param callback {function} Called with a boolean on success that indicates whether the user has or not 2FA enabled,
