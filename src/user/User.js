@@ -41,13 +41,22 @@ const User = {
     return User._isLoggingOut;
   },
   logout(callback) {
-    this._isTokenLogin = false;
-    User._startLoggingOut();
-    Meteor.call('logout', (err) => {
-      User.handleLogout();
-      Meteor.connect();
+    return new Promise((resolve, reject) => {
+      this._isTokenLogin = false;
+      User._startLoggingOut();
 
-      typeof callback == 'function' && callback(err);
+      Meteor.call('logout', error => {
+        User.handleLogout();
+        Meteor.connect();
+
+        typeof callback == 'function' && callback(err);
+
+        if (error) {
+          return reject(error);
+        }
+
+        resolve();
+      });
     });
   },
   handleLogout() {
@@ -59,25 +68,36 @@ const User = {
     User._endLoggingOut();
   },
   loginWithPassword(selector, password, callback) {
-    this._isTokenLogin = false;
-    if (typeof selector === 'string') {
-      if (selector.indexOf('@') === -1) selector = { username: selector };
-      else selector = { email: selector };
-    }
+    return new Promise((resolve, reject) => {
+      this._isTokenLogin = false;
 
-    User._startLoggingIn();
-    Meteor.call(
-      'login',
-      {
+      if (typeof selector === 'string') {
+        if (selector.indexOf('@') === -1) {
+          selector = {username: selector};
+        } else {
+          selector = {email: selector};
+        }
+      }
+
+      User._startLoggingIn();
+
+      const params = {
         user: selector,
         password: hashPassword(password),
-      },
-      (err, result) => {
-        User._handleLoginCallback(err, result);
+      };
 
-        typeof callback == 'function' && callback(err);
-      }
-    );
+      Meteor.call('login', params, (error, result) => {
+        User._handleLoginCallback(error, result);
+
+        typeof callback == 'function' && callback(error);
+
+        if (error) {
+          return reject(error);
+        }
+
+        return resolve();
+      });
+    });
   },
   loginWithPasswordAnd2faCode(selector, password, code, callback) {
     this._isTokenLogin = false;
