@@ -123,6 +123,25 @@ const User = {
       }
     );
   },
+  loginWithAutoToken(params, callback) {
+    return new Promise((resolve, reject) => {
+      this._isTokenLogin = false;
+
+      User._startLoggingIn();
+
+      Meteor.call('login', params, (error, result) => {
+        User._handleLoginCallback(error, result);
+
+        typeof callback == 'function' && callback(error);
+
+        if (error) {
+          return reject(error);
+        }
+
+        return resolve();
+      });
+    });
+  },
   logoutOtherClients(callback = () => {}) {
     Meteor.call('getNewToken', (err, res) => {
       if (err) return callback(err);
