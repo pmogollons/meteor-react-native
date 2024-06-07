@@ -11,7 +11,7 @@ declare module '@meteorrn/core' {
     | 'loggingIn'
     | 'loggingOut';
 
-  function call(...args: any[]): void;
+  function call(...args: any[]): void | Promise<any>;
   function status(): {
     connected: boolean;
     status: Status;
